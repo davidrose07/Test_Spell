@@ -16,6 +16,7 @@ class Controller(QMainWindow, Ui_MainWindow):
     label_entries=[]
     temp_list=[]
     x=-1
+    dbResults = []
     ###############################
     
     def __init__(self, *args, **kwargs) -> None:
@@ -26,6 +27,7 @@ class Controller(QMainWindow, Ui_MainWindow):
         self.WordWindow = QtWidgets.QMainWindow()
         self.ui = Ui_WordWindow()
         self.ui.setupUi(self.WordWindow)
+        self.ui.btn_use.clicked.connect(lambda: self.finish_gui(Controller.dbResults))
         self.WordWindow.show()
         self.msg_box = QMessageBox()
         self.add_words()
@@ -37,7 +39,6 @@ class Controller(QMainWindow, Ui_MainWindow):
         :param results: Tuple of the words selected 
         '''  
         results = list(all_results[0])
-        #Controller.temp_list = results
         if len(results) > 0:
             self.show()
             for word in results:
@@ -46,7 +47,6 @@ class Controller(QMainWindow, Ui_MainWindow):
                 else:
                     Controller.temp_list.append(word.lower())
                     Controller.spelling_list.append(word.lower())
-            print(Controller.temp_list)
             SCRAMBLE(Controller.temp_list)
             self.WordWindow.deleteLater()
             self.create_stacked()
@@ -113,12 +113,13 @@ class Controller(QMainWindow, Ui_MainWindow):
         '''
         self.wordsdb = DB()
         results = self.wordsdb.get_week_words(week)
+        Controller.dbResults = results
         self.ui.Start_stackedWidget.setCurrentIndex(1)
         if len(results) == 0:
             self.ui.btn_use.setEnabled(False)
         else:
             self.ui.btn_use.setEnabled(True)
-            self.ui.btn_use.clicked.connect(lambda: self.finish_gui(results))
+            
         self.ui.btn_save.clicked.connect(lambda: self.saveWords())
         try:
             self.ui.lineEdit_word1.setText(results[0][0])
@@ -196,7 +197,6 @@ class Controller(QMainWindow, Ui_MainWindow):
         """
         Function to create stacked widgets in the range of the length of the spelling list
         """
-        #print(Controller.temp_list)
         if len(Controller.temp_list) > 0:
             for i,word in enumerate(Controller.temp_list):
                 e = QtWidgets.QWidget()
@@ -213,7 +213,7 @@ class Controller(QMainWindow, Ui_MainWindow):
                     Controller.entries[i].layout().addWidget(label)
                     all_labels.append(label)
                 Controller.label_entries.append(all_labels)
-            #print(f'Label entries: {Controller.label_entries}')
+            
     def reset_labels(self) -> None:
         '''
         Function to reset the labels to default
@@ -260,7 +260,7 @@ class Controller(QMainWindow, Ui_MainWindow):
                 self.next_word()
             else:                       # Incorrect response
                 for i,letter in enumerate(correct_word):
-                    print(f'correct word: {correct_word}')
+                    
                     try:
                         if letter == phrase[i]:  # colors letters green if correct
                             label = Controller.label_entries[Controller.x][i]
@@ -301,7 +301,6 @@ class Controller(QMainWindow, Ui_MainWindow):
             Controller.spelling_list=SCRAMBLE.all_words
             SCRAMBLE.all_words=[]
             ans=self.exit_program()
-            print(ans)
             if ans== 16384:
                 Controller.correct_word,scrambled_word = SCRAMBLE.scramble(Controller.spelling_list)
                 self.lineEdit_scramble.setText("")
@@ -309,7 +308,6 @@ class Controller(QMainWindow, Ui_MainWindow):
                 self.stackedWidget.setCurrentIndex(Controller.x)
                 self.reset_labels()
             else:
-                print('Exit Exit Exit')
                 sys.exit()
         try:
             self.label_scramble.setText(scrambled_word)
