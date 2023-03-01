@@ -93,19 +93,6 @@ class Ui_WordWindow(object):
         self.lineEdit_word9.setText("")
         self.lineEdit_word10.setText("")
         
-    def editWords(self) -> None:
-        self.lineEdit_word1.setEnabled(True)
-        self.lineEdit_word2.setEnabled(True)
-        self.lineEdit_word3.setEnabled(True)
-        self.lineEdit_word4.setEnabled(True)
-        self.lineEdit_word5.setEnabled(True)
-        self.lineEdit_word6.setEnabled(True)
-        self.lineEdit_word7.setEnabled(True)
-        self.lineEdit_word8.setEnabled(True)
-        self.lineEdit_word9.setEnabled(True)
-        self.lineEdit_word10.setEnabled(True)
-        self.btn_save.setEnabled(True)
-        self.btn_use.setEnabled(False)
 
     def setupUi(self, WordWindow) -> None:
         WordWindow.setObjectName("WordWindow")
@@ -259,7 +246,7 @@ class Ui_WordWindow(object):
         font.setPointSize(10)
         self.lineEdit_word10.setFont(font)
         self.lineEdit_word10.setObjectName("lineEdit_word10")
-        self.btn_edit = QtWidgets.QPushButton(self.page2, clicked = lambda: self.editWords())
+        self.btn_edit = QtWidgets.QPushButton(self.page2)
         self.btn_edit.setGeometry(QtCore.QRect(250, 570, 100, 30))
         font = QtGui.QFont()
         font.setPointSize(10)

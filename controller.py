@@ -4,6 +4,7 @@ from scramble import SCRAMBLE
 from PyQt5.QtWidgets import *
 import time, sys
 from db import DB
+import enchant
 
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
@@ -22,15 +23,20 @@ class Controller(QMainWindow, Ui_MainWindow):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args,**kwargs)
         self.setupUi(self)
+        self.d = enchant.Dict("en_US")
+        self.bad_words = []
+        self.week = ""
         self.btn_speak.clicked.connect(lambda: SCRAMBLE.play_mp3(Controller.correct_word))
         self.btn_validate.clicked.connect(lambda: self.validate(Controller.correct_word))
         self.WordWindow = QtWidgets.QMainWindow()
         self.ui = Ui_WordWindow()
         self.ui.setupUi(self.WordWindow)
         self.ui.btn_use.clicked.connect(lambda: self.finish_gui(Controller.dbResults))
+        self.ui.btn_edit.clicked.connect(lambda: self.editWords())
         self.WordWindow.show()
         self.msg_box = QMessageBox()
         self.add_words()
+
         
     
     def finish_gui(self, all_results) -> None:
@@ -47,6 +53,7 @@ class Controller(QMainWindow, Ui_MainWindow):
                 else:
                     Controller.temp_list.append(word.lower())
                     Controller.spelling_list.append(word.lower())
+                           
             SCRAMBLE(Controller.temp_list)
             self.WordWindow.deleteLater()
             self.create_stacked()
@@ -59,7 +66,14 @@ class Controller(QMainWindow, Ui_MainWindow):
             self.msg_box.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
             self.msg_box.exec_()
             self.add_words()
-    
+
+    def prompt_bad_words(self):
+        if len(self.bad_words) > 0:
+                self.msg_box.setText(f"The words: {self.bad_words} were not found in the English Dictionary")
+                self.setWindowTitle("Words Not Found")
+                self.msg_box.setStandardButtons(QMessageBox.Ok)
+                self.msg_box.exec_()
+                
     def disable_wordEdit(self) -> None:
         '''
         Function to disable editing the words until you hit the edit button. Also disables the save button
@@ -102,9 +116,29 @@ class Controller(QMainWindow, Ui_MainWindow):
             self.msg_box.setWindowTitle("No words to save")
             self.msg_box.setStandardButtons(QMessageBox.Ok)
             self.msg_box.exec_()
-        else:           
+        else:
+            for x,word in enumerate(all_words[1:]):
+                if word != "":
+                    if self.d.check(word) == False:
+                        self.bad_words.append(word)
+                        all_words[x + 1] = ""
             self.wordsdb.save_words(all_words)
+            self.prompt_bad_words()
             self.disable_wordEdit()
+
+    def editWords(self) -> None:
+        self.ui.lineEdit_word1.setEnabled(True)
+        self.ui.lineEdit_word2.setEnabled(True)
+        self.ui.lineEdit_word3.setEnabled(True)
+        self.ui.lineEdit_word4.setEnabled(True)
+        self.ui.lineEdit_word5.setEnabled(True)
+        self.ui.lineEdit_word6.setEnabled(True)
+        self.ui.lineEdit_word7.setEnabled(True)
+        self.ui.lineEdit_word8.setEnabled(True)
+        self.ui.lineEdit_word9.setEnabled(True)
+        self.ui.lineEdit_word10.setEnabled(True)
+        self.ui.btn_save.setEnabled(True)
+        self.ui.btn_use.setEnabled(False)
 
     def openWordsWindow(self, week) -> None:
         '''
@@ -112,11 +146,17 @@ class Controller(QMainWindow, Ui_MainWindow):
         :param week: Provides the week number picked on the Start Screen
         '''
         self.wordsdb = DB()
+        self.week = week
         results = self.wordsdb.get_week_words(week)
         Controller.dbResults = results
         self.ui.Start_stackedWidget.setCurrentIndex(1)
         if len(results) == 0:
             self.ui.btn_use.setEnabled(False)
+            self.editWords()
+            self.msg_box.setText("Please add words and hit save!")
+            self.msg_box.setWindowTitle("Add Words to Begin")
+            self.msg_box.setStandardButtons(QMessageBox.Ok)
+            self.msg_box.exec_()
         else:
             self.ui.btn_use.setEnabled(True)
             

@@ -51,5 +51,14 @@ class DB:
         self.con.commit()
         self.con.close()
 
-
+    def remove_words(self, week, bad_words):
+        '''
+        Function to remove words from database
+        :param bad_words:  list of words to remove
+        '''
+        self.con = sqlite3.connect('Spelling.db')
+    
+        self.con.execute("DELETE FROM " + week + " WHERE word1= '%" + bad_words +"%' OR word2= '%" + bad_words +"%' OR word3= '%" + bad_words +"%' OR word4= '%" + bad_words +"%' OR word5= '%" + bad_words +"%' OR word6= '%" + bad_words +"%' OR word7= '%" + bad_words +"%' OR word8= '%" + bad_words +"%' OR word9= '%" + bad_words +"%' OR word10= '%" + bad_words +"%'")
         
+        self.con.commit()
+        self.con.close()
